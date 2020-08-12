@@ -36,12 +36,6 @@ const Blogs = ({
   };
 
   const loadMoreButton = () => {
-    // return (
-    //   size > 0 &&
-    //   size >= limit && (
-    //     <button onClick={loadMore} className="btn btn-outline-primary btn-lg">Load More</button>
-    //   )
-    // );
 
     if(size > 0 && size >= limit) {
       return (
