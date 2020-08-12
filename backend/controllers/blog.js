@@ -153,6 +153,7 @@ exports.read = (req, res) => {
     .select('_id title body slug mtitle mdesc categories tags postedBy createdAt updateAt')
     .exec((err, data) => {
         if (err) {
+            console.error('IN ERROR: ', err);
             return res.json({
                 error: errorHandler(err)
             });

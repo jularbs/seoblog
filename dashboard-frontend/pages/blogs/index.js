@@ -7,7 +7,6 @@ import { useState } from "react";
 import { API, DOMAIN, APP_NAME, FB_APP_ID } from "../../config";
 
 import { listBlogsWithCategoriesAndTags } from "../../actions/blog";
-import { ButtonGroup } from "reactstrap";
 
 const Blogs = ({
   blogs,
