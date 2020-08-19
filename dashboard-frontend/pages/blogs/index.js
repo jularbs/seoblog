@@ -104,7 +104,7 @@ const Blogs = ({
 
   const showAllCategories = () => {
     return categories.map((c, i) => (
-      <Link href={`/categories/${c.name}`} key={i}>
+      <Link href={`/categories/${c.slug}`} key={i}>
         <a className="btn btn-primary mr-1 ml-1 mt-3">{c.name}</a>
       </Link>
     ));
@@ -112,7 +112,7 @@ const Blogs = ({
 
   const showAllTags = () => {
     return tags.map((t, i) => (
-      <Link href={`/tags/${t.name}`} key={i}>
+      <Link href={`/tags/${t.slug}`} key={i}>
         <a className="btn btn-outline-info mr-1 ml-1 mt-3">{t.name}</a>
       </Link>
     ));

@@ -44,7 +44,7 @@ const Card = ({ blog }) => {
       <div className="row">
         <div className="col-md-4">
           <section>
-            <img src={`${API}/blog/photo/${blog.slug}`} className="img img-fluid" style={{maxHeight: '150px', width: 'auto'}} alt={blog.title} />
+            <img src={`${API}/blog/photo/${blog.slug}`} className="img img-fluid" style={{maxHeight: 'auto', width: '100%'}} alt={blog.title} />
           </section>
         </div>
         <div className="col-md-8">

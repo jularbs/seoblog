@@ -64,7 +64,7 @@ const SingleBlog = ({ blog, query }) => {
 
   const showRelatedBlog = () => {
     return related.map((blog, i) => (
-      <div className="col-md-4" key={i}>
+      <div className="col-md-4 col-sm-12" key={i}>
         <article>
           <SmallCard blog={blog} />
         </article>
@@ -91,7 +91,7 @@ const SingleBlog = ({ blog, query }) => {
 
               <section>
                 <div className="container">
-                  <h1 className="display-2 pb-3 pt-3 text-center font-weight-bold">
+                  <h1 className="display-4 pb-3 pt-5 text-center font-weight-bold">
                     {blog.title}
                   </h1>
                   <p className="lead mt-3 mark">
