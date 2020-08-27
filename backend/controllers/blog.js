@@ -128,7 +128,7 @@ exports.list = (req, res) => {
     .populate("tags", "_id name slug")
     .populate("postedBy", "_id name username")
     .select(
-      "_id title slug excerpt categories tags postedBy createdAt updateAt"
+      "_id title slug excerpt categories tags postedBy createdAt updatedAt"
     )
     .exec((err, data) => {
       if (err) {

@@ -66,14 +66,17 @@ const ReadBlogs = () => {
         <div key={i} className="mt-5 pb-5">
           <h3>{blog.title}</h3>
           <p className="mark">
-            Written by {blog.postedBy.name} | published{" "}
-            {moment(blog.updatedAt).fromNow()}
+            Written by{" "}
+            <Link href={`/profile/${blog.postedBy.username}`}>
+              <a>{blog.postedBy.name}</a>
+            </Link>{" "}
+            | published {moment(blog.updatedAt).fromNow()}
           </p>
           <button
             className="btn btn-sm btn-danger"
             onClick={() => deleteConfirm(blog.slug)}
           >
-            Delete Blog
+            Delete
           </button>
           {showUpdateButton(blog)}
         </div>
