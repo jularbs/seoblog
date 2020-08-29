@@ -4,7 +4,7 @@ const _ = require("lodash");
 const { errorHandler } = require("../helpers/dbErrorHandlers");
 const formidable = require("formidable");
 const fs = require("fs");
-const { errorMonitor } = require("stream");
+const AWS = require("aws-sdk");
 
 exports.read = (req, res) => {
   req.profile.hashed_password = undefined;
@@ -50,6 +50,84 @@ exports.publicProfile = (req, res) => {
   });
 };
 
+exports.testupdatewiths3 = (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      return res.status(400).json({
+        error: "photo could not be uplaoded",
+      });
+    }
+    let user = req.profile;
+    user = _.extend(user, fields);
+    user.photo = {};
+    user.photo = {
+      link: "",
+      contentType: "",
+    };
+
+    if (fields.password && fields.password.length < 6) {
+      return res.status(400).json({
+        error: "Password should be minimum 6 characters long",
+      });
+    }
+
+    if (files.photo) {
+      if (files.photo.size > 1000000) {
+        return res.status(400).json({
+          error: "Image should be less than 1mb",
+        });
+      }
+
+      //implement s3 file upload
+      const s3 = new AWS.S3({
+        accessKeyId: process.env.AWS_S3_PUBLICKEY,
+        secretAccessKey: process.env.AWS_S3_SECRETKEY,
+      });
+
+      const params = {
+        Bucket: process.env.AWS_S3_BUCKETNAME,
+        Key: files.photo.name, // File name you want to save as in S3
+        Body: fs.readFileSync(files.photo.path),
+      };
+
+      s3.upload(params, function (err, data) {
+        if (err) {
+          return res.status(400).json({
+            error: "Image failed to upload",
+          });
+        }
+        user.photo.link = data.Location;
+        user.photo.contentType = files.photo.type;
+
+        user.save((err, result) => {
+          if (err) {
+            return res.status(400).json({
+              error: errorHandler(err),
+            });
+          }
+          user.hashed_password = undefined;
+          user.salt = undefined;
+          user.photo = undefined;
+        });
+      });
+    }else{
+      // user.save((err, result) => {
+      //   if (err) {
+      //     return res.status(400).json({
+      //       error: errorHandler(err),
+      //     });
+      //   }
+      //   user.hashed_password = undefined;
+      //   user.salt = undefined;
+      //   user.photo = undefined;
+      // });
+    }
+    res.json(user);
+  });
+};
+
 exports.update = (req, res) => {
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
@@ -62,9 +140,9 @@ exports.update = (req, res) => {
     let user = req.profile;
     user = _.extend(user, fields);
 
-    if(fields.password && fields.password.length < 6 ) {
+    if (fields.password && fields.password.length < 6) {
       return res.status(400).json({
-        error: 'Password should be minimum 6 characters long'
+        error: "Password should be minimum 6 characters long",
       });
     }
 
@@ -101,9 +179,9 @@ exports.photo = (req, res) => {
       });
     }
 
-    if (user.photo.data) {
+    if (user.photo.link) {
       res.set("Content-Type", user.photo.contentType);
-      return res.send(user.photo.data);
+      return res.send(user.photo.link);
     }
   });
 };

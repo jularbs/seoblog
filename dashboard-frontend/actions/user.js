@@ -30,13 +30,13 @@ export const getProfile = token => {
 };
 
 export const update = (token, user) => {
-  return fetch(`${API}/user/update`, {
+  return fetch(`${API}/user/updatewiths3`, {
     method: "PUT",
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: user
+    body: user,
   })
     .then((response) => {
       handleResponse(response);

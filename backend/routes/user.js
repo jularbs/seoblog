@@ -6,11 +6,18 @@ const {
     authMiddleware
 } = require('../controllers/auth.js');
 
-const {read, publicProfile, update, photo} = require('../controllers/user');
+const {
+  read,
+  publicProfile,
+  update,
+  photo,
+  testupdatewiths3,
+} = require("../controllers/user");
 
 router.get('/user/profile', requireSignin, authMiddleware, read);
 router.get("/user/:username", publicProfile);
 router.put("/user/update", requireSignin, authMiddleware, update);
+router.put("/user/updatewiths3", requireSignin, authMiddleware, testupdatewiths3);
 router.get("/user/photo/:username", photo);
 
 module.exports = router;

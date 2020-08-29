@@ -48,7 +48,7 @@ const ProfileUpdate = () => {
           email: data.email,
           about: data.about,
           userData: new FormData(),
-          photo: `${API}/user/photo/${data.username}`,
+          photo: data.photo.link,
         });
       }
     });
@@ -84,6 +84,7 @@ const ProfileUpdate = () => {
         });
       } else {
         updateUser(data, () => {
+          console.log(data);
           setValues({
             ...values,
             username: data.username,
@@ -92,7 +93,7 @@ const ProfileUpdate = () => {
             about: data.about,
             success: true,
             loading: false,
-            photo: `${API}/user/photo/${data.username}`,
+            photo: data.photo.link,
           });
         });
       }
