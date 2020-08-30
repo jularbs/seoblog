@@ -4,7 +4,6 @@ const _ = require("lodash");
 const { errorHandler } = require("../helpers/dbErrorHandlers");
 const formidable = require("formidable");
 const fs = require("fs");
-const AWS = require("aws-sdk");
 const { uploadImageToS3 } = require("../helpers/s3uploader.js");
 
 exports.read = (req, res) => {
@@ -62,11 +61,6 @@ exports.testupdatewiths3 = (req, res) => {
     }
     let user = req.profile;
     user = _.extend(user, fields);
-    user.photo = {};
-    user.photo = {
-      link: "",
-      contentType: "",
-    };
 
     if (fields.password && fields.password.length < 6) {
       return res.status(400).json({
@@ -80,7 +74,6 @@ exports.testupdatewiths3 = (req, res) => {
           error: "Image should be less than 1mb",
         });
       }
-
       uploadImageToS3(files).then((data) => {
         user.photo.link = data;
         user.photo.contentType = files.photo.type;
@@ -90,10 +83,10 @@ exports.testupdatewiths3 = (req, res) => {
               error: errorHandler(err),
             });
           }
+          user.hashed_password = undefined;
+          user.salt = undefined;
+          res.json(user);
         });
-        user.hashed_password = undefined;
-        user.salt = undefined;
-        res.json(user);
       });
     } else {
       user.save((err, result) => {
@@ -102,10 +95,10 @@ exports.testupdatewiths3 = (req, res) => {
             error: errorHandler(err),
           });
         }
+        user.hashed_password = undefined;
+        user.salt = undefined;
+        res.json(user);
       });
-      user.hashed_password = undefined;
-      user.salt = undefined;
-      res.json(user);
     }
   });
 };

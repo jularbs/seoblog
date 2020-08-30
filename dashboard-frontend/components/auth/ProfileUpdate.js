@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { getCookie, isAuth, updateUser } from "../../actions/auth";
+import { getCookie, updateUser } from "../../actions/auth";
 import { getProfile, update } from "../../actions/user";
-import { API } from "../../config";
 
 // TO BE ADDED: ->> ADD CONFIRM OLD PASSWORD BEFORE CHANGING NEW PASSWORD. IMPLEMENT WITH CALLBACK OR VALIDATION
+// TO BE ADDED: show UI if image is selected / show a preview image for chosen files
+// CLEAN UP CODE / REFACTOR CODE
 
 const ProfileUpdate = () => {
   const [values, setValues] = useState({
@@ -15,7 +16,7 @@ const ProfileUpdate = () => {
     error: false,
     success: false,
     loading: false,
-    photo: "",
+    photoAvailable: false,
     userData: "",
     displayPhoto: "",
   });
@@ -30,7 +31,7 @@ const ProfileUpdate = () => {
     error,
     success,
     loading,
-    photo,
+    photoAvailable,
     userData,
     displayPhoto,
   } = values;
@@ -47,9 +48,19 @@ const ProfileUpdate = () => {
           email: data.email,
           about: data.about,
           userData: new FormData(),
-          photo: data.photo.link,
-          displayPhoto: data.photo.link,
         });
+        if (data.photo) {
+          setValues({
+            ...values,
+            username: data.username,
+            name: data.name,
+            email: data.email,
+            about: data.about,
+            userData: new FormData(),
+            displayPhoto: data.photo.link,
+            photoAvailable: true,
+          });
+        }
       }
     });
   };
@@ -58,9 +69,7 @@ const ProfileUpdate = () => {
   }, []);
 
   const handleChange = (name) => (e) => {
-    //
     const value = name === "photo" ? e.target.files[0] : e.target.value;
-    //let userFormData = new FormData();
     userData.set(name, value);
     setValues({
       ...values,
@@ -92,9 +101,20 @@ const ProfileUpdate = () => {
             about: data.about,
             success: true,
             loading: false,
-            photo: data.photo.link,
-            displayPhoto: data.photo.link,
           });
+          if (data.photo) {
+            setValues({
+              ...values,
+              username: data.username,
+              name: data.name,
+              email: data.email,
+              about: data.about,
+              success: true,
+              loading: false,
+              displayPhoto: data.photo.link,
+              photoAvailable: true,
+            });
+          }
         });
       }
     });
@@ -177,19 +197,26 @@ const ProfileUpdate = () => {
       ""
     );
 
+  const showPhoto = () => {
+    if (photoAvailable) {
+      return (
+        <img
+          src={displayPhoto}
+          alt="user_profile"
+          className="img img-fluid img-thumbnail mb-3"
+          style={{ maxHeight: "auto", maxWidth: "100%" }}
+        />
+      );
+    } else {
+      return <span>No Photo Available</span>;
+    }
+  };
+
   return (
     <React.Fragment>
       <div className="container-fluid">
         <div className="row">
-          <div className="col-md-4">
-            <img
-              src={displayPhoto}
-              // src={`${API}/user/photo/ralphjularbal123456`}
-              alt="user_profile"
-              className="img img-fluid img-thumbnail mb-3"
-              style={{ maxHeight: "auto", maxWidth: "100%" }}
-            />
-          </div>
+          <div className="col-md-4">{showPhoto()}</div>
           <div className="col-md-8 mb-5">
             {showSuccess()}
             {showError()}
