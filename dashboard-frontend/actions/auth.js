@@ -117,7 +117,7 @@ export const signout = (next) => {
     .catch((err) => console.log(err));
 };
 
-export const updateUser = (user, next) => {
+export const updateUser = async (user, next) => {
   if (process.browser) {
     if (localStorage.getItem("user")) {
       let auth = JSON.parse(localStorage.getItem("user"));

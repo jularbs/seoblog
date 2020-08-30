@@ -5,6 +5,7 @@ const { errorHandler } = require("../helpers/dbErrorHandlers");
 const formidable = require("formidable");
 const fs = require("fs");
 const AWS = require("aws-sdk");
+const { uploadImageToS3 } = require("../helpers/s3uploader.js");
 
 exports.read = (req, res) => {
   req.profile.hashed_password = undefined;
@@ -80,51 +81,32 @@ exports.testupdatewiths3 = (req, res) => {
         });
       }
 
-      //implement s3 file upload
-      const s3 = new AWS.S3({
-        accessKeyId: process.env.AWS_S3_PUBLICKEY,
-        secretAccessKey: process.env.AWS_S3_SECRETKEY,
-      });
-
-      const params = {
-        Bucket: process.env.AWS_S3_BUCKETNAME,
-        Key: files.photo.name, // File name you want to save as in S3
-        Body: fs.readFileSync(files.photo.path),
-      };
-
-      s3.upload(params, function (err, data) {
-        if (err) {
-          return res.status(400).json({
-            error: "Image failed to upload",
-          });
-        }
-        user.photo.link = data.Location;
+      uploadImageToS3(files).then((data) => {
+        user.photo.link = data;
         user.photo.contentType = files.photo.type;
-
         user.save((err, result) => {
           if (err) {
             return res.status(400).json({
               error: errorHandler(err),
             });
           }
-          user.hashed_password = undefined;
-          user.salt = undefined;
-          user.photo = undefined;
         });
+        user.hashed_password = undefined;
+        user.salt = undefined;
+        res.json(user);
       });
-    }else{
-      // user.save((err, result) => {
-      //   if (err) {
-      //     return res.status(400).json({
-      //       error: errorHandler(err),
-      //     });
-      //   }
-      //   user.hashed_password = undefined;
-      //   user.salt = undefined;
-      //   user.photo = undefined;
-      // });
+    } else {
+      user.save((err, result) => {
+        if (err) {
+          return res.status(400).json({
+            error: errorHandler(err),
+          });
+        }
+      });
+      user.hashed_password = undefined;
+      user.salt = undefined;
+      res.json(user);
     }
-    res.json(user);
   });
 };
 
@@ -180,7 +162,6 @@ exports.photo = (req, res) => {
     }
 
     if (user.photo.link) {
-      res.set("Content-Type", user.photo.contentType);
       return res.send(user.photo.link);
     }
   });

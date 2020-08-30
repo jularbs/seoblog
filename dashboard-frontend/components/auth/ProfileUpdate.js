@@ -1,11 +1,8 @@
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import Router from "next/router";
 import { getCookie, isAuth, updateUser } from "../../actions/auth";
 import { getProfile, update } from "../../actions/user";
 import { API } from "../../config";
 
-// TO BE FIXED: ->> PROFILE PHOTO GETTING BLANK ON FILE CHANGE && NOT UPDATING ON SUCCESS
 // TO BE ADDED: ->> ADD CONFIRM OLD PASSWORD BEFORE CHANGING NEW PASSWORD. IMPLEMENT WITH CALLBACK OR VALIDATION
 
 const ProfileUpdate = () => {
@@ -20,6 +17,7 @@ const ProfileUpdate = () => {
     loading: false,
     photo: "",
     userData: "",
+    displayPhoto: "",
   });
 
   const token = getCookie("token");
@@ -34,6 +32,7 @@ const ProfileUpdate = () => {
     loading,
     photo,
     userData,
+    displayPhoto,
   } = values;
 
   const init = () => {
@@ -49,6 +48,7 @@ const ProfileUpdate = () => {
           about: data.about,
           userData: new FormData(),
           photo: data.photo.link,
+          displayPhoto: data.photo.link,
         });
       }
     });
@@ -71,10 +71,10 @@ const ProfileUpdate = () => {
   };
 
   const handleSubmit = (e) => {
-    //
     e.preventDefault();
     setValues({ ...values, loading: true });
     update(token, userData).then((data) => {
+      console.log(data);
       if (data.error) {
         setValues({
           ...values,
@@ -84,7 +84,6 @@ const ProfileUpdate = () => {
         });
       } else {
         updateUser(data, () => {
-          console.log(data);
           setValues({
             ...values,
             username: data.username,
@@ -94,6 +93,7 @@ const ProfileUpdate = () => {
             success: true,
             loading: false,
             photo: data.photo.link,
+            displayPhoto: data.photo.link,
           });
         });
       }
@@ -104,7 +104,7 @@ const ProfileUpdate = () => {
     <form onSubmit={handleSubmit}>
       <div className="form-group">
         <label className="btn btn-outline-info">
-          Profile Photo
+          Update Profile Photo
           <input
             onChange={handleChange("photo")}
             type="file"
@@ -183,7 +183,8 @@ const ProfileUpdate = () => {
         <div className="row">
           <div className="col-md-4">
             <img
-              src={photo}
+              src={displayPhoto}
+              // src={`${API}/user/photo/ralphjularbal123456`}
               alt="user_profile"
               className="img img-fluid img-thumbnail mb-3"
               style={{ maxHeight: "auto", maxWidth: "100%" }}

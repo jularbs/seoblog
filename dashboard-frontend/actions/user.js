@@ -29,8 +29,8 @@ export const getProfile = token => {
     .catch((err) => console.log(err));
 };
 
-export const update = (token, user) => {
-  return fetch(`${API}/user/updatewiths3`, {
+export const update = async (token, user) => {
+  return await fetch(`${API}/user/updatewiths3`, {
     method: "PUT",
     headers: {
       Accept: "application/json",
