@@ -4,6 +4,7 @@ import { getProfile, update } from "../../actions/user";
 
 // TO BE ADDED: ->> ADD CONFIRM OLD PASSWORD BEFORE CHANGING NEW PASSWORD. IMPLEMENT WITH CALLBACK OR VALIDATION
 // TO BE ADDED: show UI if image is selected / show a preview image for chosen files
+// TO BE ADDED: SET TIMEOUT FOR REQUEST TO 5 SECONDS
 // CLEAN UP CODE / REFACTOR CODE
 
 const ProfileUpdate = () => {
@@ -22,6 +23,7 @@ const ProfileUpdate = () => {
   });
 
   const token = getCookie("token");
+  
   const {
     username,
     name,
@@ -64,6 +66,7 @@ const ProfileUpdate = () => {
       }
     });
   };
+
   useEffect(() => {
     init();
   }, []);

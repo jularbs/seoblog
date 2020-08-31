@@ -31,7 +31,6 @@ const blogSchema = new mongoose.Schema({
         type: String
     },
     photo: {
-        data: Buffer,
         contentType: String,
         link: String
     },

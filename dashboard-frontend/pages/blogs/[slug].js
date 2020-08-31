@@ -91,7 +91,7 @@ const SingleBlog = ({ blog, query }) => {
               <section>
                 <div className="row" style={{ marginTop: "-30px" }}>
                   <img
-                    src={`${API}/blog/photo/${blog.slug}`}
+                    src={blog.photo.link}
                     alt={blog.title}
                     className="img img-fluid featured-image"
                   />
@@ -108,7 +108,7 @@ const SingleBlog = ({ blog, query }) => {
                     <Link href={`/profile/${blog.postedBy.username}`}>
                       <a>{blog.postedBy.name}</a>
                     </Link>{" "}
-                    | Published {moment(blog.updatedAt).fromNow()}
+                    | Published {moment(blog.createdAt).fromNow()}
                   </p>
 
                   <div className="pb-3">
@@ -147,6 +147,7 @@ SingleBlog.getInitialProps = ({ query }) => {
     if (data.error) {
       console.log(data.error);
     } else {
+      console.log(data);
       return { blog: data, query };
     }
   });

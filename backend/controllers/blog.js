@@ -9,7 +9,7 @@ const _ = require("lodash");
 const fs = require("fs");
 const { smartTrim } = require("../helpers/blog.js");
 const { errorHandler } = require("../helpers/dbErrorHandlers");
-const { identity } = require("lodash");
+const { uploadImageToS3 } = require("../helpers/s3uploader.js");
 
 exports.create = (req, res) => {
   let form = new formidable.IncomingForm();
@@ -64,62 +64,62 @@ exports.create = (req, res) => {
         });
       }
 
-      blog.photo.data = fs.readFileSync(files.photo.path);
-      blog.photo.contentType = files.photo.type;
-    }
-
-    blog.save((err, result) => {
-      if (err) {
-        return res.status(400).json({
-          error: errorHandler(err),
-        });
-      }
-      // res.json(result);
-
-      Blog.findByIdAndUpdate(
-        result._id,
-        {
-          $push: {
-            categories: categoryArr,
-          },
-        },
-        {
-          new: true,
-        }
-      ).exec((err, result) => {
-        if (err) {
-          return res.status(400).json({
-            _location: "categories",
-            error: errorHandler(err),
-          });
-        } else {
-          if (tagArr.length === 0) {
-            res.json(result);
-          } else {
-            Blog.findByIdAndUpdate(
-              result._id,
-              {
-                $push: {
-                  tags: tagArr,
-                },
-              },
-              {
-                new: true,
-              }
-            ).exec((err, result) => {
-              if (err) {
-                return res.status(400).json({
-                  _location: "tags",
-                  error: errorHandler(err),
-                });
-              } else {
-                res.json(result);
-              }
+      uploadImageToS3(files).then((data) => {
+        blog.photo.link = data;
+        blog.photo.contentType = files.photo.type;
+        blog.save((err, result) => {
+          if (err) {
+            return res.status(400).json({
+              error: errorHandler(err),
             });
           }
-        }
+
+          Blog.findByIdAndUpdate(
+            result._id,
+            {
+              $push: {
+                categories: categoryArr,
+              },
+            },
+            {
+              new: true,
+            }
+          ).exec((err, result) => {
+            if (err) {
+              return res.status(400).json({
+                _location: "categories",
+                error: errorHandler(err),
+              });
+            } else {
+              if (tagArr.length === 0) {
+                res.json(result);
+              } else {
+                Blog.findByIdAndUpdate(
+                  result._id,
+                  {
+                    $push: {
+                      tags: tagArr,
+                    },
+                  },
+                  {
+                    new: true,
+                  }
+                ).exec((err, result) => {
+                  if (err) {
+                    return res.status(400).json({
+                      _location: "tags",
+                      error: errorHandler(err),
+                    });
+                  } else {
+                    res.json(result);
+                  }
+                });
+              }
+            }
+          });
+        });
       });
-    });
+    }
   });
 };
 
@@ -149,7 +149,7 @@ exports.read = (req, res) => {
     .populate("tags", "_id name slug")
     .populate("postedBy", "_id name username")
     .select(
-      "_id title body slug mtitle mdesc categories tags postedBy createdAt updateAt"
+      "_id title photo body slug mtitle mdesc categories tags postedBy createdAt updateAt"
     )
     .exec((err, data) => {
       if (err) {
@@ -194,7 +194,7 @@ exports.listAllCategoriesTags = (req, res) => {
     .skip(skip)
     .limit(limit)
     .select(
-      "_id title slug excerpt categories tags postedBy createdAt updatedAt"
+      "_id title photo slug excerpt categories tags postedBy createdAt updatedAt"
     )
     .exec((err, data) => {
       if (err) {
@@ -231,6 +231,7 @@ exports.listAllCategoriesTags = (req, res) => {
     });
 };
 
+//implement s3 on update
 exports.update = (req, res) => {
   const slug = req.params.slug.toLowerCase();
 
@@ -251,18 +252,11 @@ exports.update = (req, res) => {
         });
       }
 
-      // const {
-      //     title,
-      //     body,
-      //     categories,
-      //     tags
-      // } = fields;
-
       let slugBeforeMerge = oldBlog.slug;
       oldBlog = _.merge(oldBlog, fields);
       oldBlog.slug = slugBeforeMerge;
 
-      const { body, desc, categories, tags } = fields;
+      const { body, categories, tags } = fields;
 
       if (body) {
         oldBlog.excerpt = smartTrim(body, 250, " ", "...");
@@ -283,19 +277,30 @@ exports.update = (req, res) => {
             error: "Image too large. ( > 1MB ).",
           });
         }
-
-        oldBlog.photo.data = fs.readFileSync(files.photo.path);
-        oldBlog.photo.contentType = files.photo.type;
-      }
-
-      oldBlog.save((err, result) => {
-        if (err) {
-          return res.status(400).json({
-            error: errorHandler(err),
+        uploadImageToS3(files).then((data) => {
+          oldBlog.photo.link = data;
+          oldBlog.photo.contentType = files.photo.type;
+          oldBlog.save((err, result) => {
+            console.log(result);
+            if (err) {
+              return res.status(400).json({
+                error: errorHandler(err),
+              });
+            }
+            res.json(result);
           });
-        }
-        res.json(result);
-      });
+        });
+      } else {
+        //no photo
+        oldBlog.save((err, result) => {
+          if (err) {
+            return res.status(400).json({
+              error: errorHandler(err),
+            });
+          }
+          res.json(result);
+        });
+      }
     });
   });
 };
@@ -326,7 +331,7 @@ exports.listRelated = (req, res) => {
   Blog.find({ _id: { $ne: _id }, categories: { $in: categories } })
     .limit(limit)
     .populate("postedBy", "_id name username profile")
-    .select("title slug excerpt postedBy createdAt updatedAt")
+    .select("title photo slug excerpt postedBy createdAt updatedAt")
     .exec((err, blogs) => {
       if (err) {
         return res.status(400).json({
@@ -362,10 +367,10 @@ exports.listSearch = (req, res) => {
 };
 
 exports.listByUser = (req, res) => {
-  User.findOne({username: req.params.username}).exec((err, user) => {
-    if(err) {
+  User.findOne({ username: req.params.username }).exec((err, user) => {
+    if (err) {
       return res.status(400).json({
-        error: errorHandler(err)
+        error: errorHandler(err),
       });
     }
     let userId = user._id;
@@ -373,14 +378,14 @@ exports.listByUser = (req, res) => {
       .populate("categories", "_id name slug")
       .populate("tags", "_id name slug")
       .populate("postedBy", "_id name username")
-      .select('_id title slug postedBy createdAt updatedAt')
+      .select("_id title slug postedBy createdAt updatedAt")
       .exec((err, data) => {
-        if(err) {
+        if (err) {
           return res.status(400).json({
             error: errorHandler(err),
           });
         }
         res.json(data);
-      })
-  })
+      });
+  });
 };

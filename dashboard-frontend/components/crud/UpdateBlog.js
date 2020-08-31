@@ -1,19 +1,19 @@
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import Router from "next/router";
 import dynamic from "next/dynamic";
 import { withRouter } from "next/router";
-import { getCookie, isAuth } from "../../actions/auth";
+import { getCookie } from "../../actions/auth";
 
 import { getCategories } from "../../actions/category";
 import { getTags } from "../../actions/tag";
 import { singleBlog, updateBlog } from "../../actions/blog";
 
 import { Quillmodules, Quillformats } from "../../helpers/quill";
-import { API } from "../../config";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "../../node_modules/react-quill/dist/quill.snow.css";
+
+// update Quill, getting warning: See browser console
+// Show loading state on update blog
 
 const UpdateBlog = ({ router }) => {
   const [body, setBody] = useState("");
@@ -22,6 +22,7 @@ const UpdateBlog = ({ router }) => {
     success: "",
     formData: "",
     title: "",
+    displayPhoto: "",
   });
 
   const [categories, setCategories] = useState([]);
@@ -30,7 +31,7 @@ const UpdateBlog = ({ router }) => {
   const [checkedCat, setCheckedCat] = useState([]);
   const [checkedTag, setCheckedTag] = useState([]);
 
-  const { error, success, formData, title } = values;
+  const { error, success, formData, title, displayPhoto } = values;
   const token = getCookie("token");
 
   useEffect(() => {
@@ -66,7 +67,7 @@ const UpdateBlog = ({ router }) => {
         if (data.error) {
           console.log(data.error);
         }
-        setValues({ ...values, title: data.title });
+        setValues({ ...values, title: data.title, displayPhoto: data.photo.link });
         setBody(data.body);
         setCategoriesArray(data.categories);
         setTagsArray(data.tags);
@@ -114,12 +115,8 @@ const UpdateBlog = ({ router }) => {
           ...values,
           success: `Blog titled ${data.title} is successfully updated`,
           error: "",
+          displayPhoto: data.photo.link,
         });
-        // if (isAuth() && isAuth().role == 1) {
-        //   Router.replace(`${DOMAIN}/admin/crud/${router.query.slug}`);
-        // } else if (isAuth() && isAuth().role == 0) {
-        //   Router.replace(`${DOMAIN}/user/crud/${router.query.slug}`);
-        // }
       }
     });
   };
@@ -274,7 +271,13 @@ const UpdateBlog = ({ router }) => {
           <div>
             <div className="form-group">
               <h5>Featured Image</h5>
-              {body && <img src={`${API}/blog/photo/${router.query.slug}`} alt={title} style={{width: '100%'}}/>}
+              {body && (
+                <img
+                  src={displayPhoto}
+                  alt={title}
+                  style={{ width: "100%" }}
+                />
+              )}
               <hr />
               <p className="text-muted mb-1">Max size: 1mb</p>
               <label className="btn btn-outline-info">
