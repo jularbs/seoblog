@@ -159,3 +159,61 @@ exports.photo = (req, res) => {
     }
   });
 };
+
+exports.pendingUsers = (req, res) => {
+  User.find({ regStatus: 0 })
+    .select("_id name email createdAt")
+    .exec((err, users) => {
+      if (err) {
+        return res.status(400).json({
+          error:
+            "There's a problem getting pending users. Please try refreshing the page.",
+        });
+      }
+
+      if (!users) {
+        return res.status(400).json({
+          message: "There are currently no pending users",
+        });
+      }
+
+      return res.json(users);
+    });
+};
+
+exports.acceptUser = (req, res) => {
+  const { _id } = req.body;
+
+  User.findById(_id, (err, doc) => {
+    if (err) {
+      return res.status(400).json({
+        error: errorHandler(err),
+      });
+    }
+
+    doc.regStatus = 1;
+    doc.save((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+
+      this.pendingUsers(req, res);
+    });
+  });
+};
+
+exports.declineUser = (req, res) => {
+  const {_id } = req.body;
+
+  User.findOneAndDelete({_id}).exec((err, user) => {
+    if(err){
+      return res.status(400).json({
+        error: errorHandler(err)
+      })
+    }
+    
+    this.pendingUsers(req, res);
+  })
+};

@@ -50,7 +50,13 @@ const userSchema = new mongoose.Schema({
     resetPasswordLink: {
         data: String,
         default: ''
+    },
+    regStatus: {
+        type: Number,
+        default: 0,
+        require: true
     }
+
 }, {timestamps: true});
 
 userSchema.virtual('password')

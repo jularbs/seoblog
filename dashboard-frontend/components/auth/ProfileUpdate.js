@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getCookie, updateUser } from "../../actions/auth";
 import { getProfile, update } from "../../actions/user";
 
+// TO FIX
 // TO BE ADDED: ->> ADD CONFIRM OLD PASSWORD BEFORE CHANGING NEW PASSWORD. IMPLEMENT WITH CALLBACK OR VALIDATION
 // TO BE ADDED: show UI if image is selected / show a preview image for chosen files
 // TO BE ADDED: SET TIMEOUT FOR REQUEST TO 5 SECONDS

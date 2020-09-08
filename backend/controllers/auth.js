@@ -41,13 +41,19 @@ exports.signin = (req, res) => {
   User.findOne({ email }).exec((err, user) => {
     if (err || !user) {
       return res.status(400).json({
-        error: "User with that email does not exist. Please sign up.",
+        error: "User with that email does not exist. Please create an account.",
       });
     }
     //authenticate
     if (!user.authenticate(password)) {
       return res.status(400).json({
         error: "Email and password do not match.",
+      });
+    }
+
+    if(user.regStatus == 0){
+      return res.status(400).json({
+        error: "Your account registration is still pending. Please try again later."
       });
     }
 

@@ -6,8 +6,6 @@ export const Quillmodules = {
             header: '2'
         }, {
             header: [3, 4, 5, 6]
-        }, {
-            font: []
         }],
         [{
             size: []

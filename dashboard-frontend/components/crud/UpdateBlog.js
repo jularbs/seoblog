@@ -12,14 +12,14 @@ import { Quillmodules, Quillformats } from "../../helpers/quill";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "../../node_modules/react-quill/dist/quill.snow.css";
 
-// update Quill, getting warning: See browser console
-// Show loading state on update blog
+// update Quill, getting warning: See browser console : update to beta v2
 
 const UpdateBlog = ({ router }) => {
   const [body, setBody] = useState("");
   const [values, setValues] = useState({
     error: "",
     success: "",
+    loading: "",
     formData: "",
     title: "",
     displayPhoto: "",
@@ -31,7 +31,7 @@ const UpdateBlog = ({ router }) => {
   const [checkedCat, setCheckedCat] = useState([]);
   const [checkedTag, setCheckedTag] = useState([]);
 
-  const { error, success, formData, title, displayPhoto } = values;
+  const { error, success, loading, formData, title, displayPhoto } = values;
   const token = getCookie("token");
 
   useEffect(() => {
@@ -107,6 +107,7 @@ const UpdateBlog = ({ router }) => {
 
   const editBlog = (e) => {
     e.preventDefault();
+    setValues({...values, success: "", loading: "Processing...abs"})
     updateBlog(formData, token, router.query.slug).then((data) => {
       if (data.error) {
         setValues({ ...values, error: data.error });
@@ -116,6 +117,7 @@ const UpdateBlog = ({ router }) => {
           success: `Blog titled ${data.title} is successfully updated`,
           error: "",
           displayPhoto: data.photo.link,
+          loading: ""
         });
       }
     });
@@ -127,6 +129,15 @@ const UpdateBlog = ({ router }) => {
       style={{ display: error ? "" : "none" }}
     >
       {error}
+    </div>
+  );
+
+  const showLoading = () => (
+    <div
+      className="alert alert-info"
+      style={{ display: loading ? "" : "none" }}
+    >
+      Processing...
     </div>
   );
 
@@ -265,6 +276,7 @@ const UpdateBlog = ({ router }) => {
         <div className="col-md-8">
           {showError()}
           {showSuccess()}
+          {showLoading()}
           {updateBlogForm()}
         </div>
         <div className="col-md-4">

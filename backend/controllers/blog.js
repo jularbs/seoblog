@@ -27,13 +27,13 @@ exports.create = (req, res) => {
 
     if (!title || !title.length) {
       return res.status(400).json({
-        error: "title is required",
+        error: "Title is required",
       });
     }
 
     if (!body || body.length < 200) {
       return res.status(400).json({
-        error: "Content too short",
+        error: "Content too short. Content should be at least 200 characters",
       });
     }
 
@@ -47,10 +47,15 @@ exports.create = (req, res) => {
     let blog = new Blog();
     blog.title = title;
     blog.body = body;
-    blog.excerpt = smartTrim(body, 250, " ", "...");
+    blog.excerpt = smartTrim(
+      stripHtml(body.substring(0,300)),
+      280,
+      " ",
+      "..."
+    );
     blog.slug = slugify(title).toLowerCase();
     blog.mtitle = `${title} | ${process.env.APP_NAME}`;
-    blog.mdesc = stripHtml(body.substring(0, 120));
+    blog.mdesc = stripHtml(body.substring(0, 160));
     blog.postedBy = req.user._id;
 
     //categories and tags
@@ -118,6 +123,10 @@ exports.create = (req, res) => {
             }
           });
         });
+      });
+    } else {
+      return res.status(400).json({
+        error: "No image is selected.",
       });
     }
   });
