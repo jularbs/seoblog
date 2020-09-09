@@ -205,15 +205,93 @@ exports.acceptUser = (req, res) => {
 };
 
 exports.declineUser = (req, res) => {
-  const {_id } = req.body;
+  const { _id } = req.body;
 
-  User.findOneAndDelete({_id}).exec((err, user) => {
-    if(err){
+  User.findOneAndDelete({ _id }).exec((err, user) => {
+    if (err) {
       return res.status(400).json({
-        error: errorHandler(err)
-      })
+        error: errorHandler(err),
+      });
     }
-    
+
     this.pendingUsers(req, res);
-  })
+  });
+};
+
+exports.removeUser = (req, res) => {
+  const { _id } = req.body;
+
+  User.findById(_id, (err, doc) => {
+    if (err) {
+      return res.status(400).json({
+        error: errorHandler(err),
+      });
+    }
+
+    doc.regStatus = 2;
+    doc.save((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+
+      this.listUsers(req, res);
+    });
+  });
+};
+
+exports.listUsers = (req, res) => {
+  User.find({ regStatus: 1 })
+    .select("name email photo role")
+    .exec((err, users) => {
+      if (err || !users) {
+        return res.status(400).json({
+          error: "An error occurred while fetching users",
+        });
+      }
+
+      res.json(users);
+    });
+};
+
+exports.changeRole = (req, res) => {
+  const { _id, role } = req.body;
+
+  User.findById(_id, (err, doc) => {
+    if (err) {
+      return res.status(400).json({
+        error: errorHandler(err),
+      });
+    }
+
+    if (!doc) {
+      return res.json({ error: "User not found" });
+    }
+
+    doc.role = role;
+    doc.save((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+
+      this.listUsers(req, res);
+    });
+  });
+};
+
+exports.listRemovedUsers = (req, res) => {
+  User.find({ regStatus: 2 })
+    .select("name email photo role")
+    .exec((err, users) => {
+      if (err || !users) {
+        return res.status(400).json({
+          error: "An error occurred while fetching users",
+        });
+      }
+
+      res.json(users);
+    });
 };

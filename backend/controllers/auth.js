@@ -51,9 +51,17 @@ exports.signin = (req, res) => {
       });
     }
 
-    if(user.regStatus == 0){
+    if (user.regStatus == 0) {
       return res.status(400).json({
-        error: "Your account registration is still pending. Please try again later."
+        error:
+          "Your account registration is still pending. Please try again later.",
+      });
+    }
+
+    if (user.regStatus == 2) {
+      return res.status(400).json({
+        error:
+          "Your account is temporarily blocked. Please contact an administrator.",
       });
     }
 
