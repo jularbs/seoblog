@@ -18,9 +18,7 @@ const app = express();
 
 //cors
 if(process.env.NODE_ENV=='development'){
-    app.use(cors({origin: `${process.env.CLIENT_URL}`}));
-    // app.use(cors({ origin: `http://localhost:3001` }));
-    
+    app.use(cors({origin: `${process.env.CLIENT_URL}`}));    
 }
 
 //database

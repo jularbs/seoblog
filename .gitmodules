@@ -1,3 +1,7 @@
 [submodule "dzrh-frontend"]
 	path = dzrh-frontend
 	url = https://github.com/jularbs/dzrh-frontend.git
+
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/jularbs/dzrh-frontend.git
