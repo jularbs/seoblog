@@ -71,7 +71,7 @@ exports.signin = (req, res) => {
     });
 
     res.cookie("token", token, { expiresIn: "1d" });
-    const { _id, username, name, email, role } = user;
+    const { _id, username, name, email, role, photo } = user;
 
     return res.json({
       token,
@@ -81,6 +81,7 @@ exports.signin = (req, res) => {
         name,
         email,
         role,
+        photo,
       },
     });
   });

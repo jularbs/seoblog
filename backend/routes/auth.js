@@ -23,6 +23,8 @@ const {
 router.post("/signup", userSignupValidator, runValidation, signup);
 router.post("/signin", userSigninValidator, runValidation, signin);
 router.get("/signout", signout);
+
+
 router.get("/registration/pendingusers", requireSignin, adminMiddleware, pendingUsers);
 router.put("/registration/accept", requireSignin, adminMiddleware, acceptUser);
 router.put("/registration/decline", requireSignin, adminMiddleware, declineUser);
