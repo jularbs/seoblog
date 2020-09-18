@@ -23,7 +23,7 @@ exports.create = (req, res) => {
       });
     }
 
-    const { title, body, categories, tags } = fields;
+    const { title, body, categories, tags, status } = fields;
 
     if (!title || !title.length) {
       return res.status(400).json({
@@ -45,17 +45,18 @@ exports.create = (req, res) => {
     }
 
     let blog = new Blog();
+    blog.status = status;
     blog.title = title;
     blog.body = body;
     blog.excerpt = smartTrim(
-      stripHtml(body.substring(0,300)),
+      stripHtml(body).substring(0, 300),
       280,
       " ",
       "..."
     );
     blog.slug = slugify(title).toLowerCase();
     blog.mtitle = `${title} | ${process.env.APP_NAME}`;
-    blog.mdesc = stripHtml(body.substring(0, 160));
+    blog.mdesc = stripHtml(body).substring(0, 150);
     blog.postedBy = req.user._id;
 
     //categories and tags
@@ -158,7 +159,7 @@ exports.read = (req, res) => {
     .populate("tags", "_id name slug")
     .populate("postedBy", "_id name username")
     .select(
-      "_id title photo body slug mtitle mdesc categories tags postedBy createdAt updateAt"
+      "_id status title photo body slug mtitle mdesc categories tags postedBy createdAt updateAt"
     )
     .exec((err, data) => {
       if (err) {
@@ -265,11 +266,20 @@ exports.update = (req, res) => {
       oldBlog = _.merge(oldBlog, fields);
       oldBlog.slug = slugBeforeMerge;
 
-      const { body, categories, tags } = fields;
+      const { body, categories, tags, status } = fields;
+
+      if (status) {
+        oldBlog.status = status;
+      }
 
       if (body) {
-        oldBlog.excerpt = smartTrim(body, 250, " ", "...");
-        oldBlog.mdesc = stripHtml(body.substring(0, 120));
+        oldBlog.excerpt = smartTrim(
+          stripHtml(body).substring(0, 300),
+          280,
+          " ",
+          "..."
+        );
+        oldBlog.mdesc = stripHtml(body).substring(0, 150);
       }
 
       if (categories) {
@@ -290,7 +300,6 @@ exports.update = (req, res) => {
           oldBlog.photo.link = data;
           oldBlog.photo.contentType = files.photo.type;
           oldBlog.save((err, result) => {
-            console.log(result);
             if (err) {
               return res.status(400).json({
                 error: errorHandler(err),
@@ -396,5 +405,34 @@ exports.listByUser = (req, res) => {
         }
         res.json(data);
       });
+  });
+};
+
+exports.uploadImage = (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      return res.status(400).json({
+        error: "There was a problem with uploading the image.",
+      });
+    }
+
+    if (files.photo) {
+      if (files.photo.size > 1000000) {
+        return res.status(400).json({
+          error: "Image too large. ( > 1MB ).",
+        });
+      }
+
+      uploadImageToS3(files).then((data) => {
+        res.json({ location: data });
+      });
+    } else {
+      return res.status(400).json({
+        error: "No image is selected.",
+      });
+    }
   });
 };

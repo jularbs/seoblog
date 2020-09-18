@@ -10,7 +10,8 @@ const {
   photo,
   listRelated,
   listSearch,
-  listByUser
+  listByUser,
+  uploadImage
 } = require("../controllers/blog.js");
 const {
     requireSignin,
@@ -34,5 +35,10 @@ router.post("/user/blog", requireSignin, authMiddleware, create);
 router.delete("/user/blog/:slug", requireSignin, authMiddleware, canUpdateDeleteBlog, remove);
 router.put("/user/blog/:slug", requireSignin, authMiddleware, canUpdateDeleteBlog, update);
 router.get("/:username/blogs", listByUser);
+
+// for image handler
+
+router.post("/blog/uploadimage", requireSignin, adminMiddleware, uploadImage);
+router.post("/user/uploadimage", requireSignin, authMiddleware, uploadImage);
 
 module.exports = router;
