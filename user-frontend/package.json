@@ -1,0 +1,39 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-brands-svg-icons": "^5.14.0",
+    "@fortawesome/free-regular-svg-icons": "^5.14.0",
+    "@fortawesome/free-solid-svg-icons": "^5.14.0",
+    "@fortawesome/react-fontawesome": "^0.1.11",
+    "@zeit/next-css": "^1.0.1",
+    "@zeit/next-sass": "^1.0.1",
+    "bootstrap": "^4.5.2",
+    "classnames": "^2.2.6",
+    "file-loader": "^6.1.0",
+    "next": "9.5.3",
+    "node-sass": "^4.14.1",
+    "react": "16.13.1",
+    "react-circle-slider": "^1.6.2",
+    "react-dom": "16.13.1",
+    "react-id-swiper": "^4.0.0",
+    "react-modal-video": "^1.2.6",
+    "react-player": "^2.6.2",
+    "react-router-dom": "^5.2.0",
+    "react-slick": "^0.27.11",
+    "react-spinners": "^0.9.0",
+    "react-toastify": "^6.0.8",
+    "react-use-analytics-api": "^1.4.15",
+    "reactstrap": "^8.6.0",
+    "simple-react-validator": "^1.5.0",
+    "slick-carousel": "^1.8.1",
+    "swiper": "^6.2.0"
+  }
+}

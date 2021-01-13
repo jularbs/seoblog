@@ -12,14 +12,15 @@ const userRoutes = require('./routes/user');
 const categoryRoutes = require('./routes/category');
 const tagRoutes = require('./routes/tag');
 const optionRoutes = require('./routes/option');
-
+const uploaderRoutes = require('./routes/uploader')
+const googleApiRoutes = require('./routes/googleapi');
 
 //app
 const app = express();
 
 //cors
 if(process.env.NODE_ENV=='development'){
-    app.use(cors({origin: `${process.env.CLIENT_URL}`}));    
+    app.use(cors({origin: [`${process.env.CLIENT_URL}`, `${process.env.BACKEND_URL}`]}));    
 }
 
 //database
@@ -45,6 +46,8 @@ app.use('/api', userRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', tagRoutes);
 app.use('/api', optionRoutes);
+app.use('/api', uploaderRoutes);
+app.use('/api', googleApiRoutes);
 
 
 //port

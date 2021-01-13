@@ -1,0 +1,36 @@
+.mobilemenu-container {
+  position: relative;
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+border-bottom: 2px solid #ffcc29;
+  .mobilemenu-hamburger-container {
+    margin: 1rem 2rem
+  }
+
+  .mobilemenu-search-container {
+    margin: 1rem 2rem;
+  }
+  .mobilemenu-logo-container {
+    position: relative;
+    flex-grow: 2;
+
+    .mobilemenu-logo-background {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform: skew(-20deg);
+      background-color: #ffcc29;
+    }
+
+    .mobilemenu-logo-image {
+      position: absolute;
+      width: 100%;
+      top: 50%; 
+      text-align: center;
+      left: 50%; 
+      transform: translate(-50%, -50%);
+    }
+  }
+}

@@ -1,0 +1,102 @@
+.hero-container {
+  width: 100%;
+  height: 500px;
+  position: relative;
+
+  .post-nav {
+    height: 50px;
+    color: white;
+    font-weight: bold;
+    width: 30%;
+    background-image: linear-gradient(
+      to left,
+      rgba(0, 0, 0, 0),
+      rgba(0, 0, 0, 1)
+    );
+  }
+  .sponsor-image {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+
+  .post-meta-button {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+
+    .btn-dark {
+      background-color: black;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.11), 0 2px 2px rgba(0, 0, 0, 0.11),
+        0 4px 4px rgba(0, 0, 0, 0.11), 0 8px 8px rgba(0, 0, 0, 0.11),
+        0 16px 16px rgba(0, 0, 0, 0.11), 0 32px 32px rgba(0, 0, 0, 0.11);
+    }
+  }
+}
+
+.vp-post-container {
+  background-color: white !important;
+  padding: 1rem 2rem;
+
+  .details-container {
+    .category {
+      text-transform: uppercase;
+      font-size: 0.8em;
+      font-weight: bold;
+      color: rgb(9, 77, 149);
+      margin-bottom: 0.5rem;
+    }
+
+    .title {
+      font-weight: bold;
+      line-height: 2rem;
+      font-size: 2rem;
+    }
+
+    .details-meta {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.7rem 0;
+      font-size: 0.7rem;
+      align-items: center;
+    }
+  }
+}
+
+.vp-tags {
+  .tag-items {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid lightgrey;
+    border-radius: 0.7rem;
+    margin: 0 0.2rem;
+  }
+}
+
+.display-header {
+  color: rgb(9, 77, 149);
+  font-family: sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.vp-sidebar-postcard {
+
+  margin-top: .5rem;
+  .postcard-category {
+    text-transform: uppercase;
+    font-size: .7rem;
+    margin-top  : .5rem;
+  }
+
+  .postcard-title {
+    font-weight: 600;
+  }
+
+  .postcard-date {
+    font-size: .7rem;
+    margin-top: .3rem;
+  }
+}

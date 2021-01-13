@@ -55,8 +55,15 @@ const blogSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
+    postType: {
+      type: String,
+      required: true,
+    },
+    album: { type: Array, default: [] },
+    albumName: String,
+    videoLink: { type: String },
   },
   {
     timestamps: true,

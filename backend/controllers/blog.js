@@ -6,14 +6,14 @@ const formidable = require("formidable");
 const slugify = require("slugify");
 const stripHtml = require("string-strip-html");
 const _ = require("lodash");
-const fs = require("fs");
 const { smartTrim } = require("../helpers/blog.js");
 const { errorHandler } = require("../helpers/dbErrorHandlers");
-const { uploadImageToS3 } = require("../helpers/s3uploader.js");
+const { uploadImageToS3, uploadTos3 } = require("../helpers/s3uploader.js");
 
 exports.create = (req, res) => {
   let form = new formidable.IncomingForm();
 
+  form.multiples = true;
   form.keepExtensions = true;
 
   form.parse(req, (err, fields, files) => {
@@ -23,7 +23,17 @@ exports.create = (req, res) => {
       });
     }
 
-    const { title, body, categories, tags, status } = fields;
+    const {
+      title,
+      body,
+      categories,
+      tags,
+      status,
+      postType,
+      videoLink,
+      album,
+      albumName,
+    } = fields;
 
     if (!title || !title.length) {
       return res.status(400).json({
@@ -31,13 +41,12 @@ exports.create = (req, res) => {
       });
     }
 
-    if (!body || body.length < 200) {
-      return res.status(400).json({
-        error: "Content too short. Content should be at least 200 characters",
-      });
-    }
+    // if (!body || body.length < 200) {
+    //   return res.status(400).json({
+    //     error: "Content too short. Content should be at least 200 characters",
+    //   });
+    // }
 
-    // console.log(categories.length);
     if (!categories || categories.length === 0) {
       return res.status(400).json({
         error: "Category is required",
@@ -63,6 +72,15 @@ exports.create = (req, res) => {
     let categoryArr = categories && categories.split(",");
     let tagArr = tags && tags.split(",");
 
+    blog.postType = postType;
+    blog.videoLink = videoLink;
+
+    const albumContainer = JSON.parse(album);
+    if (album.length > 0) {
+      blog.album = albumContainer;
+      blog.albumName = albumName;
+    }
+
     if (files.photo) {
       if (files.photo.size > 1000000) {
         return res.status(400).json({
@@ -70,9 +88,10 @@ exports.create = (req, res) => {
         });
       }
 
-      uploadImageToS3(files).then((data) => {
+      uploadTos3(files.photo, "featuredimage").then((data) => {
         blog.photo.link = data;
         blog.photo.contentType = files.photo.type;
+
         blog.save((err, result) => {
           if (err) {
             return res.status(400).json({
@@ -139,7 +158,7 @@ exports.list = (req, res) => {
     .populate("tags", "_id name slug")
     .populate("postedBy", "_id name username")
     .select(
-      "_id title slug excerpt categories tags postedBy createdAt updatedAt"
+      "_id title slug excerpt categories tags postedBy postType createdAt updatedAt"
     )
     .exec((err, data) => {
       if (err) {
@@ -159,7 +178,7 @@ exports.read = (req, res) => {
     .populate("tags", "_id name slug")
     .populate("postedBy", "_id name username")
     .select(
-      "_id status title photo body slug mtitle mdesc categories tags postedBy createdAt updateAt"
+      "_id status title photo body slug mtitle mdesc categories tags postType albumName videoLink album postedBy createdAt updateAt"
     )
     .exec((err, data) => {
       if (err) {
@@ -190,7 +209,7 @@ exports.remove = (req, res) => {
 };
 
 exports.listAllCategoriesTags = (req, res) => {
-  let limit = req.body.limit ? parseInt(req.body.limit) : 10;
+  let limit = req.body.limit ? parseInt(req.body.limit) : 5;
   let skip = req.body.skip ? parseInt(req.body.skip) : 0;
   let blogs;
   let categories;
@@ -200,11 +219,11 @@ exports.listAllCategoriesTags = (req, res) => {
     .populate("categories", "_id name slug")
     .populate("tags", "_id name slug")
     .populate("postedBy", "_id name username profile photo")
-    .sort({ createdAt: -1 })
+    .sort({ updatedAt: -1 })
     .skip(skip)
     .limit(limit)
     .select(
-      "_id title photo slug excerpt categories tags postedBy createdAt updatedAt"
+      "_id status title photo slug excerpt categories tags postType postedBy createdAt updatedAt"
     )
     .exec((err, data) => {
       if (err) {
@@ -266,7 +285,15 @@ exports.update = (req, res) => {
       oldBlog = _.merge(oldBlog, fields);
       oldBlog.slug = slugBeforeMerge;
 
-      const { body, categories, tags, status } = fields;
+      const {
+        body,
+        categories,
+        tags,
+        status,
+        album,
+        postType,
+        videoLink,
+      } = fields;
 
       if (status) {
         oldBlog.status = status;
@@ -288,6 +315,16 @@ exports.update = (req, res) => {
 
       if (tags) {
         oldBlog.tags = tags.split(",");
+      }
+
+      if (postType) oldBlog.postType = postType;
+      if (videoLink) oldBlog.videoLink = videoLink;
+
+      if (album) {
+        const albumContainer = JSON.parse(album);
+        if (album.length > 0) {
+          oldBlog.album = albumContainer;
+        }
       }
 
       if (files.photo) {
@@ -408,6 +445,29 @@ exports.listByUser = (req, res) => {
   });
 };
 
+exports.listByCategory = (req, res) => {
+  let limit = req.body.limit ? parseInt(req.body.limit) : 10;
+  let skip = req.body.skip ? parseInt(req.body.skip) : 0;
+  let id = req.body.id;
+
+  Blog.find({ categories: id })
+    .populate("categories", "_id name slug")
+    .populate("tags", "_id name slug")
+    .populate("postedBy", "_id name username")
+    .sort({ updatedAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .select("_id title slug photo postType postedBy createdAt updatedAt")
+    .exec((err, data) => {
+      if (err) {
+        return res.status(400).json({
+          error: errorHandler(err),
+        });
+      }
+      res.json(data);
+    });
+};
+
 exports.uploadImage = (req, res) => {
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
@@ -435,4 +495,84 @@ exports.uploadImage = (req, res) => {
       });
     }
   });
+};
+
+exports.init = async (req, res) => {
+  const categories = await Category.find({}).select("_id name slug").exec();
+
+  const getPostsByCatID = (id) => {
+    return new Promise((resolve, reject) => {
+      Blog.find({ categories: id })
+        .populate("categories", "_id name slug")
+        .sort({ updatedAt: -1 })
+        .skip(0)
+        .limit(4)
+        .select("_id title slug photo album postType createdAt updatedAt")
+        .exec((error, data) => {
+          return resolve(data);
+        });
+    });
+  };
+
+  const asyncGetPostsByCatID = async (id) => {
+    return getPostsByCatID(id);
+  };
+
+  const getAllPostsByCategory = await Promise.all(
+    categories.map(async (category) => ({
+      categoryID: category._id,
+      categoryName: category.name,
+      categorySlug: category.slug,
+      posts: await asyncGetPostsByCatID(category.id),
+    }))
+  );
+
+  res.json(getAllPostsByCategory);
+};
+
+exports.mobinit = (req, res) => {
+  Blog.find({})
+    .populate("categories", "_id name slug")
+    .sort({ updatedAt: -1 })
+    .skip(0)
+    .limit(15)
+    .select("_id title slug photo categories postType createdAt updatedAt")
+    .exec((err, data) => {
+      if (err) {
+        return res.json({
+          error: errorHandler(err),
+        });
+      }
+      res.json(data);
+    });
+};
+
+exports.getByPostType = async (req, res) => {
+  const postType = req.params.postType;
+
+  Blog.find({ postType: postType })
+    .populate("categories", "_id name slug")
+    .sort({ updatedAt: -1 })
+    .skip(0)
+    .limit(8)
+    .select("_id title slug photo videoLink postType createdAt updatedAt")
+    .exec((error, data) => {
+      res.json(data);
+    });
+};
+
+exports.getLatest = async (req, res) => {
+  Blog.find({})
+    .populate("categories", "_id name slug")
+    .sort({ updatedAt: -1 })
+    .skip(0)
+    .limit(4)
+    .select("_id title slug photo postType postType createdAt updatedAt")
+    .exec((error, data) => {
+      res.json(data);
+    });
+};
+
+exports.getTrendingPosts = (req, res) => {
+  res.json(req.queries);
 };

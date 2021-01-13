@@ -1,0 +1,41 @@
+.card-container {
+  display: flex;
+  padding: 0.4rem 1rem;
+  background-color: white;
+  justify-content: space-between;
+
+  .image-thumbnail {
+    width: 60%;
+    height: 120px;
+
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+
+    .image-meta {
+      color: white;
+      position: absolute;
+      bottom: 10px;
+      right: 20px;
+    }
+  }
+
+  .post-details {
+    padding: 0 0.7rem;
+
+    .category {
+      text-transform: uppercase;
+      margin-bottom: .2rem;
+      font-size: 0.7rem;
+    }
+
+    .title {
+      margin-bottom: .5rem;
+      font-weight: bold;
+    }
+
+    .date {
+      font-size: 0.7rem;
+    }
+  }
+}

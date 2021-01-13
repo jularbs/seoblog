@@ -43,8 +43,9 @@ exports.read = (req, res) => {
 
     Blog.find({ tags: tag })
       .populate("postedBy", "_id name")
+      .populate("categories", "_id name")
       .sort({ createdAt: "descending" })
-      .select("_id title slug postedBy createdAt updatedAt")
+      .select("_id title slug postedBy createdAt updatedAt postType photo")
       .exec((err, data) => {
         if (err) {
           return res.status(400).json({

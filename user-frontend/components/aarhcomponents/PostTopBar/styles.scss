@@ -1,0 +1,75 @@
+.posttopbar-container {
+  //experiment
+  position: sticky;
+  top: 0;
+  z-index: 999;
+
+  .posttopbar-main {
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    .posttopbar-left {
+      display: flex;
+      align-items: center;
+      & > div {
+        padding: 0 5px;
+      }
+      .posttopbar-image {
+        & > img {
+          height: 60px;
+          width: auto;
+        }
+      }
+
+      .posttopbar-backnav {
+        padding: 0 1rem;
+        font-size: 1.5rem;
+      }
+
+      .posttopbar-title {
+        font-weight: bold;
+      }
+    }
+
+    .posttopbar-right {
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+
+      .posttopbar-type-button {
+        border-left: 1px solid rgba(0, 0, 0, 0.3);
+        border-right: 1px solid rgba(0, 0, 0, 0.3);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0 1.2rem;
+        margin-right: 1rem;
+
+        font-size: 1.5rem;
+        color: rgba(0, 0, 0, 0.5);
+      }
+      .posttopbar-share-buttons {
+        display: flex;
+        align-items: center;
+
+        & > * {
+          margin: 0 0.5rem;
+        }
+        span {
+          text-transform: uppercase;
+          font-size: 0.7rem;
+        }
+
+        .share-icons {
+          font-size: 1.8rem;
+        }
+      }
+    }
+  }
+}
+
+.posttopbar-progess-container {
+  height: 3px;
+  width: 100%;
+  background-color: red;
+}
